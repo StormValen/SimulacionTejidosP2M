@@ -11,6 +11,17 @@
 bool show_test_window = false;
 
 float *partVerts;
+float timePerFrame = 0.033;
+float radius = 0.05f;
+glm::vec3 gravity = { 0, -9.8, 0 };
+
+glm::vec3 normal = { 0,0,0 };
+float d;
+glm::vec3 vNormal, vTangencial;
+float coefFriction = 0.f;
+float coefElasticity = 0.9f;
+int frame;
+
 
 namespace LilSpheres {
 	extern const int maxParticles;
@@ -25,10 +36,25 @@ struct Particle {
 	glm::vec3 lastPos;
 	glm::vec3 vel;
 	glm::vec3 lastVel;
-	float life;
 };
 
 Particle *particlesContainer = new Particle[LilSpheres::maxParticles];
+
+namespace Sphere {
+	extern glm::vec3 centro = { 0.f, 1.f, 0.f };
+	extern void setupSphere(glm::vec3 pos = centro, float radius = 1.f);
+	extern void cleanupSphere();
+	extern void updateSphere(glm::vec3 pos, float radius = 1.f);
+	extern void drawSphere();
+
+}
+
+struct laSphere {
+	glm::vec3 pos;
+	float radius;
+};
+
+laSphere *sphere = new laSphere();
 
 namespace ClothMesh {
 	extern void setupClothMesh();
@@ -40,8 +66,12 @@ namespace ClothMesh {
 void GUI() {
 	{	//FrameRate
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		
+		ImGui::SliderFloat("Gravity", &gravity.y, -15, 15);
 
-		//TODO
+		//GUI Waterfall
+		ImGui::SliderFloat("Coef.Elasticity", &coefElasticity, 0, 1);
+		ImGui::SliderFloat("Coef.Friction", &coefFriction, 0, 1);
 	}
 
 	// ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
@@ -51,12 +81,19 @@ void GUI() {
 	}
 }
 
+void RandPosSphere() {
+	srand(time(NULL));
+	sphere->pos = { rand()%8-4, 2, rand() % 8 - 4 };
+	sphere->radius = 1.0f;
+}
+
 void InitVerts() {
 
 	partVerts = new float[LilSpheres::maxParticles * 3];
+	RandPosSphere();
 	float dist = -2.8f;
-	float zDist = 0.f;
-	for (int i =0 ; i < 252; ++i) {
+	float zDist = -3.2f;
+	for (int i = 0; i < 252; ++i) {
 		if (i % 14 == 0) {
 			zDist += 0.4f;
 			dist = -2.8f;
@@ -66,21 +103,126 @@ void InitVerts() {
 		partVerts[i * 3 + 2] = zDist;
 		dist += 0.4f;
 	}
+
+	for (int i = 0; i < LilSpheres::maxParticles; i++) {
+		particlesContainer[i].pos = glm::vec3(partVerts[i * 3], partVerts[i * 3 + 1], partVerts[i * 3 + 2]);
+		particlesContainer[i].vel = glm::vec3(0, 0, 0); //random
+	}
 }
+
+void UpdatePosition(Particle *particlesContainer) {
+	for (int i = 0; i < LilSpheres::maxParticles; i++) {
+		if (i != 0 && i != 13) {
+
+			particlesContainer[i].lastVel = particlesContainer[i].vel;
+
+			//update vector velocity velocity with formula
+			particlesContainer[i].vel = particlesContainer[i].lastVel + gravity * timePerFrame;
+
+			//save last position 
+			particlesContainer[i].lastPos = particlesContainer[i].pos;
+
+			//update position with formula
+			particlesContainer[i].pos = particlesContainer[i].lastPos + timePerFrame * particlesContainer[i].lastVel; //components x and z have 0 gravity.
+
+		}
+	}
+
+}
+
+void UpdateColision(Particle *particlesContainer, int i) {
+	//friction values
+	vNormal = glm::dot(normal, particlesContainer[i].vel) * normal;
+	vTangencial = particlesContainer[i].vel - vNormal;
+
+	particlesContainer[i].pos = particlesContainer[i].pos - (1 + coefElasticity) * (glm::dot(normal, particlesContainer[i].pos) + d)*normal;
+	particlesContainer[i].vel = particlesContainer[i].vel - (1 + coefElasticity) * (glm::dot(normal, particlesContainer[i].vel))*normal - coefFriction*vTangencial;
+}
+
+void CheckColision(Particle *particlesContainer) {
+	for (int i = 0; i < LilSpheres::maxParticles; i++) {
+		//FLOOR
+		if (particlesContainer[i].pos.y <= 0 + radius) {
+			normal = { 0,1,0 };
+			d = 0;
+			UpdateColision(particlesContainer, i);
+		}
+		//LEFT WALL
+		if (particlesContainer[i].pos.x <= -5 + radius) {
+			normal = { 1,0,0 };
+			d = 5;
+			UpdateColision(particlesContainer, i);
+		}
+		//RIGHT WALL
+		if (particlesContainer[i].pos.x >= 5 - radius) {
+			normal = { -1,0,0 };
+			d = 5;
+			UpdateColision(particlesContainer, i);
+		}
+		//FRONT WALL
+		if (particlesContainer[i].pos.z <= -5 + radius) {
+			normal = { 0,0,1 };
+			d = 5;
+			UpdateColision(particlesContainer, i);
+		}
+		//BACK WALL
+		if (particlesContainer[i].pos.z >= 5 - radius) {
+			normal = { 0,0,-1 };
+			d = 5;
+			UpdateColision(particlesContainer, i);
+		}
+		//TOP WALL
+		if (particlesContainer[i].pos.y >= 10 - radius) {
+			normal = { 0,-1,0 };
+			d = 10;
+			UpdateColision(particlesContainer, i);
+		}
+		//SPHERE
+		if (glm::pow((particlesContainer[i].pos.x - sphere->pos.x), 2) + glm::pow((particlesContainer[i].pos.y - sphere->pos.y), 2) + glm::pow((particlesContainer[i].pos.z - sphere->pos.z), 2) <= glm::pow((sphere->radius + radius), 2)) {
+			normal = { particlesContainer[i].pos - sphere->pos };
+			d = -(particlesContainer[i].pos.x*normal.x) - (particlesContainer[i].pos.y*normal.y) - (particlesContainer[i].pos.z*normal.z);
+
+			//friction values
+			vNormal = glm::dot(normal, particlesContainer[i].vel) * normal;
+			vTangencial = particlesContainer[i].vel - vNormal;
+
+			//elasticity and friction
+			particlesContainer[i].pos = particlesContainer[i].pos - (1 + coefElasticity) * (glm::dot(normal, particlesContainer[i].pos) + d)*normal;
+			particlesContainer[i].vel = particlesContainer[i].vel - (1 + coefElasticity) * (glm::dot(normal, particlesContainer[i].vel))* normal - coefFriction*vTangencial;
+
+		}
+	}
+}
+
+
 
 void PhysicsInit() {
-	//TODO
 
 	InitVerts();
-	//ClothMesh::setupClothMesh();
 }
 void PhysicsUpdate(float dt) {
-	//TODO
 
+	UpdatePosition(particlesContainer);
+	CheckColision(particlesContainer);
+
+	if (frame % 100 == 0) {
+		InitVerts();
+	}
+
+	for (int i = 0; i < 252; ++i) {
+		//update partVerts vector with the new position
+		partVerts[3 * i] = particlesContainer[i].pos.x;
+		partVerts[3 * i + 1] = particlesContainer[i].pos.y;
+		partVerts[3 * i + 2] = particlesContainer[i].pos.z;
+
+	}
+
+	frame++;
+
+	Sphere::updateSphere(sphere->pos, sphere->radius);
 	LilSpheres::updateParticles(0, LilSpheres::maxParticles, partVerts);
 	ClothMesh::updateClothMesh(partVerts);
 }
 void PhysicsCleanup() {
 	//TODO
 }
-
