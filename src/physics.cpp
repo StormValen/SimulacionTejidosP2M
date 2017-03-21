@@ -39,6 +39,7 @@ struct Particle {
 };
 
 Particle *particlesContainer = new Particle[LilSpheres::maxParticles];
+//Particle **particlesContainer2D;
 
 namespace Sphere {
 	extern glm::vec3 centro = { 0.f, 1.f, 0.f };
@@ -107,6 +108,96 @@ void InitVerts() {
 	for (int i = 0; i < LilSpheres::maxParticles; i++) {
 		particlesContainer[i].pos = glm::vec3(partVerts[i * 3], partVerts[i * 3 + 1], partVerts[i * 3 + 2]);
 		particlesContainer[i].vel = glm::vec3(0, 0, 0); //random
+	}
+
+	/*particlesContainer2D = new Particle*[18];
+	for (int i = 0; i < 18; i++) {
+		particlesContainer2D[i] = new Particle[14];
+	}
+
+	int q = 0; 
+
+	for (int i = 0; i < 18; i++) {
+		for (int j = 0; j < 14; j++) {
+			particlesContainer2D[i][j] = particlesContainer[q];
+			q++;
+		}
+	}*/
+}
+
+void Srings(Particle *particlesContainer) {
+	for (int i = 0; i < 252; i++) {
+		
+		if (i <= 13) {
+			if (i == 0 || i == 13) {
+				break;
+			}
+			if (i == 1 || i == 12) {
+				//TODO
+				break;
+			}
+			//GRUPO 1
+			break;
+		}
+		if (i >= 14 && i <= 27 ) {
+			if (i == 14 || i == 27) {
+				//TODO
+				break;
+			}
+			if (i == 15 || i == 26) {
+				//TODO
+				break;
+			}
+			//GRUPO 1
+			break;
+		}
+		if (i >= 224 && i <= 237) {
+			if (i == 224 || i == 237) {
+				//TODO
+				break;
+			}
+			if (i == 225 || i == 236) {
+				//TODO
+				break;
+			}
+			//GRUPO 2
+			break;
+		}
+		if (i >= 238) {
+			if (i == 238 || i == 251) {
+				//TODO
+				break;
+			}
+			if (i == 239 || i == 250) {
+				//TODO
+				break;
+			}
+
+			//GRUPO 2
+			break;
+		}
+		if (i >= 28 && i <= 223) {
+			if (i % 14 == 0) {
+				//TODO
+				break;
+			}
+			if (i % 14 == 1) {
+				//TODO
+				break;
+			}
+			if (i % 14 == 12) {
+				//TODO
+				break;
+			}
+			if (i % 14 == 13) {
+				//TODO
+				break;
+			}
+			else {
+				//TODO
+				break;
+			}
+		}
 	}
 }
 
@@ -192,6 +283,10 @@ void CheckColision(Particle *particlesContainer) {
 
 		}
 	}
+
+
+
+
 }
 
 
