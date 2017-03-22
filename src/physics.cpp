@@ -7,6 +7,7 @@
 #include "GL_framework.h"
 #include <stdlib.h>
 #include <time.h>
+#include <iostream>
 
 bool show_test_window = false;
 
@@ -21,6 +22,8 @@ glm::vec3 vNormal, vTangencial;
 float coefFriction = 0.f;
 float coefElasticity = 0.9f;
 int frame;
+float Ke, Kd;
+glm::vec3 fTotal;
 
 
 namespace LilSpheres {
@@ -38,7 +41,7 @@ struct Particle {
 	glm::vec3 lastVel;
 };
 
-Particle *particlesContainer = new Particle[LilSpheres::maxParticles];
+Particle *pC = new Particle[LilSpheres::maxParticles];
 //Particle **particlesContainer2D;
 
 namespace Sphere {
@@ -89,6 +92,8 @@ void RandPosSphere() {
 }
 
 void InitVerts() {
+	Ke = 0.01;
+	Kd = 0;
 
 	partVerts = new float[LilSpheres::maxParticles * 3];
 	RandPosSphere();
@@ -106,8 +111,8 @@ void InitVerts() {
 	}
 
 	for (int i = 0; i < LilSpheres::maxParticles; i++) {
-		particlesContainer[i].pos = glm::vec3(partVerts[i * 3], partVerts[i * 3 + 1], partVerts[i * 3 + 2]);
-		particlesContainer[i].vel = glm::vec3(0, 0, 0); //random
+		pC[i].pos = glm::vec3(partVerts[i * 3], partVerts[i * 3 + 1], partVerts[i * 3 + 2]);
+		pC[i].vel = glm::vec3(0, 0, 0); //random
 	}
 
 	/*particlesContainer2D = new Particle*[18];
@@ -119,167 +124,543 @@ void InitVerts() {
 
 	for (int i = 0; i < 18; i++) {
 		for (int j = 0; j < 14; j++) {
-			particlesContainer2D[i][j] = particlesContainer[q];
+			particlesContainer2D[i][j] = pC[q];
 			q++;
 		}
 	}*/
 }
 
-void Srings(Particle *particlesContainer) {
-	for (int i = 0; i < 252; i++) {
+int Srings(Particle *pC, int i) {
+	glm::vec3 fIzquierda, fIzquierdaIzquierda, fDerecha, fDerechaDerecha, fArriba, fArribaArriba, fAbajo, fAbajoAbajo, fDiagonal1, fDiagonal2, fDiagonal3, fDiagonal4;
+	
+	//for (int i = 0; i < 252; i++) {
 		
 		if (i <= 13) {
-			if (i == 0 || i == 13) {
-				break;
-			}
-			if (i == 1 || i == 12) {
+			
+			if (i == 1) {
 				//TODO
-				break;
+			/*	fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
+			}
+			if (i == 12) {
+				//TODO
+				/*fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				
+				fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
 			}
 			//GRUPO 1
-			break;
+		/*	fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+			fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+			//fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+			fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+			fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+			fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+			//fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+			fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+			//fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+			//fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+			fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+			fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+			fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+			return 0;*/
 		}
 		if (i >= 14 && i <= 27 ) {
-			if (i == 14 || i == 27) {
+			if (i == 14) {
 				//TODO
-				break;
+			/*	//fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				//fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				//fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				//fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				//fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
 			}
-			if (i == 15 || i == 26) {
+			if (i == 27) {
 				//TODO
-				break;
+			/*	fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				//fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				//fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				//fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				//fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				//fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
+			}
+			if (i == 15) {
+				//TODO
+			/*	fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				//fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				//fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
+			}
+			if (i == 26) {
+				//TODO
+			/*	fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				//fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				//fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
 			}
 			//GRUPO 1
-			break;
+		/*	fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+			fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+			fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+			fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+			fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+			fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+			//fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+			fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+			fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+			fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+			fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+			fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+			fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+			return 0;*/
 		}
 		if (i >= 224 && i <= 237) {
-			if (i == 224 || i == 237) {
-				//TODO
-				break;
+			if (i == 224) {
+			/*	//TODO
+				//fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				//fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				//fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				//fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				//fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
 			}
-			if (i == 225 || i == 236) {
+			if (i == 237) {
+			/*	//TODO
+				fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				//fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				//fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				//fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				//fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				//fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
+			}
+			if (i == 225) {
 				//TODO
-				break;
+			/*	fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				//fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				//fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
+			}
+			if (i == 236) {
+				//TODO
+			/*	fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				//fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				//fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
 			}
 			//GRUPO 2
-			break;
+		/*	fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+			fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+			fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+			fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+			fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+			fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+			fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+			//fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+			fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+			fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+			fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+			fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+			fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+			return 0;*/
 		}
 		if (i >= 238) {
-			if (i == 238 || i == 251) {
-				//TODO
-				break;
+			if (i == 238) {
+			/*	//TODO
+				//fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				//fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				//fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				//fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				//fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				//fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				//fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
 			}
-			if (i == 239 || i == 250) {
+			if (i == 251) {
+		/*		//TODO
+				fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				//fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				//fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				//fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				//fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				//fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				//fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				//fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
+			}
+			if (i == 239) {
+			/*	//TODO
+				fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				//fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				//fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				//fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				//fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				//fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
+			}
+			if (i == 250) {
 				//TODO
-				break;
+			/*	fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				//fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				//fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				//fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				//fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				//fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
 			}
 
 			//GRUPO 2
-			break;
+			return 0;
 		}
 		if (i >= 28 && i <= 223) {
 			if (i % 14 == 0) {
 				//TODO
-				break;
+			/*	//fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				//fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				//fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				//fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
 			}
 			if (i % 14 == 1) {
 				//TODO
-				break;
+			/*	fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				//fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
 			}
 			if (i % 14 == 12) {
-				//TODO
-				break;
+		/*		//TODO
+				fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				//fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
 			}
 			if (i % 14 == 13) {
-				//TODO
-				break;
+			/*	//TODO
+				fIzquierda = -(Ke*(glm::distance(pC[i].pos, pC[i - 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 1].vel), (pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos)))*(pC[i].pos - pC[i - 1].pos) / glm::distance(pC[i].pos, pC[i - 1].pos));
+				//fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i + 1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 1].vel), (pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos)))*(pC[i].pos - pC[i + 1].pos) / glm::distance(pC[i].pos, pC[i + 1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i - 15].vel), (pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos)))*(pC[i].pos - pC[i - 15].pos) / glm::distance(pC[i].pos, pC[i - 15].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i - 1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i - 1].vel - pC[i - 2].vel), (pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos)))*(pC[i - 1].pos - pC[i - 2].pos) / glm::distance(pC[i - 1].pos, pC[i - 2].pos));
+				//fDerechaDerecha = -(Ke*(glm::distance(pC[i + 1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				fArribaArriba = -(Ke*(glm::distance(pC[i - 15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i - 15].vel - pC[i - 30].vel), (pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos)))*(pC[i - 15].pos - pC[i - 30].pos) / glm::distance(pC[i - 15].pos, pC[i - 30].pos));
+				fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i + 15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos));
+
+				fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				//fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				//fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+				return 0;*/
 			}
 			else {
 				//TODO
-				break;
+				fIzquierda = -(Ke*(glm::distance(pC[i].pos,pC[i-1].pos)-(2.8f)+Kd*glm::dot((pC[i].vel- pC[i-1].vel),(pC[i].pos- pC[i-1].pos)/glm::distance(pC[i].pos, pC[i-1].pos)))*(pC[i].pos - pC[i-1].pos) / glm::distance(pC[i].pos, pC[i-1].pos));
+				fDerecha = -(Ke*(glm::distance(pC[i].pos, pC[i+1].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i+1].vel), (pC[i].pos - pC[i+1].pos) / glm::distance(pC[i].pos, pC[i+1].pos)))*(pC[i].pos - pC[i+1].pos) / glm::distance(pC[i].pos, pC[i+1].pos));
+				fArriba = -(Ke*(glm::distance(pC[i].pos, pC[i - 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i -15].vel), (pC[i].pos - pC[i -15].pos) / glm::distance(pC[i].pos, pC[i-15].pos)))*(pC[i].pos - pC[i -15].pos) / glm::distance(pC[i].pos, pC[i -15].pos));
+				fAbajo = -(Ke*(glm::distance(pC[i].pos, pC[i + 15].pos) - (2.8f) + Kd*glm::dot((pC[i].vel - pC[i + 15].vel), (pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos)))*(pC[i].pos - pC[i + 15].pos) / glm::distance(pC[i].pos, pC[i + 15].pos));
+
+				fIzquierdaIzquierda = -(Ke*(glm::distance(pC[i-1].pos, pC[i - 2].pos) - (2.8f) + Kd*glm::dot((pC[i-1].vel - pC[i - 2].vel), (pC[i-1].pos - pC[i - 2].pos) / glm::distance(pC[i-1].pos, pC[i - 2].pos)))*(pC[i-1].pos - pC[i - 2].pos) / glm::distance(pC[i-1].pos, pC[i - 2].pos));
+				fDerechaDerecha = -(Ke*(glm::distance(pC[i +1].pos, pC[i + 2].pos) - (2.8f) + Kd*glm::dot((pC[i + 1].vel - pC[i + 2].vel), (pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos)))*(pC[i + 1].pos - pC[i + 2].pos) / glm::distance(pC[i + 1].pos, pC[i + 2].pos));
+				fArribaArriba = -(Ke*(glm::distance(pC[i-15].pos, pC[i - 30].pos) - (2.8f) + Kd*glm::dot((pC[i-15].vel - pC[i - 30].vel), (pC[i-15].pos - pC[i - 30].pos) / glm::distance(pC[i-15].pos, pC[i - 30].pos)))*(pC[i-15].pos - pC[i - 30].pos) / glm::distance(pC[i-15].pos, pC[i - 30].pos));
+				fAbajoAbajo = -(Ke*(glm::distance(pC[i + 15].pos, pC[i + 30].pos) - (2.8f) + Kd*glm::dot((pC[i +15].vel - pC[i + 30].vel), (pC[i + 15].pos - pC[i + 30].pos) / glm::distance(pC[i + 15].pos, pC[i + 30].pos)))*(pC[i+ 15].pos - pC[i + 30].pos) / glm::distance(pC[i +15].pos, pC[i + 30].pos));
+
+				fDiagonal1 = -(Ke*(glm::distance(pC[i].pos, pC[i - 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 16].vel), (pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos)))*(pC[i].pos - pC[i - 16].pos) / glm::distance(pC[i].pos, pC[i - 16].pos));
+				fDiagonal2 = -(Ke*(glm::distance(pC[i].pos, pC[i - 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i - 14].vel), (pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos)))*(pC[i].pos - pC[i - 14].pos) / glm::distance(pC[i].pos, pC[i - 14].pos));
+				fDiagonal3 = -(Ke*(glm::distance(pC[i].pos, pC[i + 16].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 16].vel), (pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos)))*(pC[i].pos - pC[i + 16].pos) / glm::distance(pC[i].pos, pC[i + 16].pos));
+				fDiagonal4 = -(Ke*(glm::distance(pC[i].pos, pC[i + 14].pos) - (4.252f) + Kd*glm::dot((pC[i].vel - pC[i + 14].vel), (pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos)))*(pC[i].pos - pC[i + 14].pos) / glm::distance(pC[i].pos, pC[i + 14].pos));
+
+				fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+
+				std::cout << fIzquierda.x <<" " << fIzquierda.y << " " << fIzquierda.z << std::endl;
+
+				return 0;
 			}
 		}
-	}
+	//}
 }
 
-void UpdatePosition(Particle *particlesContainer) {
+void UpdatePosition(Particle *pC) {
 	for (int i = 0; i < LilSpheres::maxParticles; i++) {
 		if (i != 0 && i != 13) {
 
-			particlesContainer[i].lastVel = particlesContainer[i].vel;
+			Srings(pC, i);
+
+			pC[i].lastVel = pC[i].vel;
 
 			//update vector velocity velocity with formula
-			particlesContainer[i].vel = particlesContainer[i].lastVel + gravity * timePerFrame;
+			pC[i].vel = pC[i].lastVel + fTotal * timePerFrame;
 
 			//save last position 
-			particlesContainer[i].lastPos = particlesContainer[i].pos;
+			pC[i].lastPos = pC[i].pos;
 
 			//update position with formula
-			particlesContainer[i].pos = particlesContainer[i].lastPos + timePerFrame * particlesContainer[i].lastVel; //components x and z have 0 gravity.
+			pC[i].pos = pC[i].lastPos + timePerFrame * pC[i].lastVel; //components x and z have 0 gravity.
 
 		}
 	}
 
 }
 
-void UpdateColision(Particle *particlesContainer, int i) {
+void UpdateColision(Particle *pC, int i) {
 	//friction values
-	vNormal = glm::dot(normal, particlesContainer[i].vel) * normal;
-	vTangencial = particlesContainer[i].vel - vNormal;
+	vNormal = glm::dot(normal, pC[i].vel) * normal;
+	vTangencial = pC[i].vel - vNormal;
 
-	particlesContainer[i].pos = particlesContainer[i].pos - (1 + coefElasticity) * (glm::dot(normal, particlesContainer[i].pos) + d)*normal;
-	particlesContainer[i].vel = particlesContainer[i].vel - (1 + coefElasticity) * (glm::dot(normal, particlesContainer[i].vel))*normal - coefFriction*vTangencial;
+	pC[i].pos = pC[i].pos - (1 + coefElasticity) * (glm::dot(normal, pC[i].pos) + d)*normal;
+	pC[i].vel = pC[i].vel - (1 + coefElasticity) * (glm::dot(normal, pC[i].vel))*normal - coefFriction*vTangencial;
 }
 
-void CheckColision(Particle *particlesContainer) {
+void CheckColision(Particle *pC) {
 	for (int i = 0; i < LilSpheres::maxParticles; i++) {
 		//FLOOR
-		if (particlesContainer[i].pos.y <= 0 + radius) {
+		if (pC[i].pos.y <= 0 + radius) {
 			normal = { 0,1,0 };
 			d = 0;
-			UpdateColision(particlesContainer, i);
+			UpdateColision(pC, i);
 		}
 		//LEFT WALL
-		if (particlesContainer[i].pos.x <= -5 + radius) {
+		if (pC[i].pos.x <= -5 + radius) {
 			normal = { 1,0,0 };
 			d = 5;
-			UpdateColision(particlesContainer, i);
+			UpdateColision(pC, i);
 		}
 		//RIGHT WALL
-		if (particlesContainer[i].pos.x >= 5 - radius) {
+		if (pC[i].pos.x >= 5 - radius) {
 			normal = { -1,0,0 };
 			d = 5;
-			UpdateColision(particlesContainer, i);
+			UpdateColision(pC, i);
 		}
 		//FRONT WALL
-		if (particlesContainer[i].pos.z <= -5 + radius) {
+		if (pC[i].pos.z <= -5 + radius) {
 			normal = { 0,0,1 };
 			d = 5;
-			UpdateColision(particlesContainer, i);
+			UpdateColision(pC, i);
 		}
 		//BACK WALL
-		if (particlesContainer[i].pos.z >= 5 - radius) {
+		if (pC[i].pos.z >= 5 - radius) {
 			normal = { 0,0,-1 };
 			d = 5;
-			UpdateColision(particlesContainer, i);
+			UpdateColision(pC, i);
 		}
 		//TOP WALL
-		if (particlesContainer[i].pos.y >= 10 - radius) {
+		if (pC[i].pos.y >= 10 - radius) {
 			normal = { 0,-1,0 };
 			d = 10;
-			UpdateColision(particlesContainer, i);
+			UpdateColision(pC, i);
 		}
 		//SPHERE
-		if (glm::pow((particlesContainer[i].pos.x - sphere->pos.x), 2) + glm::pow((particlesContainer[i].pos.y - sphere->pos.y), 2) + glm::pow((particlesContainer[i].pos.z - sphere->pos.z), 2) <= glm::pow((sphere->radius + radius), 2)) {
-			normal = { particlesContainer[i].pos - sphere->pos };
-			d = -(particlesContainer[i].pos.x*normal.x) - (particlesContainer[i].pos.y*normal.y) - (particlesContainer[i].pos.z*normal.z);
+		if (glm::pow((pC[i].pos.x - sphere->pos.x), 2) + glm::pow((pC[i].pos.y - sphere->pos.y), 2) + glm::pow((pC[i].pos.z - sphere->pos.z), 2) <= glm::pow((sphere->radius + radius), 2)) {
+			normal = { pC[i].pos - sphere->pos };
+			d = -(pC[i].pos.x*normal.x) - (pC[i].pos.y*normal.y) - (pC[i].pos.z*normal.z);
 
 			//friction values
-			vNormal = glm::dot(normal, particlesContainer[i].vel) * normal;
-			vTangencial = particlesContainer[i].vel - vNormal;
+			vNormal = glm::dot(normal, pC[i].vel) * normal;
+			vTangencial = pC[i].vel - vNormal;
 
 			//elasticity and friction
-			particlesContainer[i].pos = particlesContainer[i].pos - (1 + coefElasticity) * (glm::dot(normal, particlesContainer[i].pos) + d)*normal;
-			particlesContainer[i].vel = particlesContainer[i].vel - (1 + coefElasticity) * (glm::dot(normal, particlesContainer[i].vel))* normal - coefFriction*vTangencial;
+			pC[i].pos = pC[i].pos - (1 + coefElasticity) * (glm::dot(normal, pC[i].pos) + d)*normal;
+			pC[i].vel = pC[i].vel - (1 + coefElasticity) * (glm::dot(normal, pC[i].vel))* normal - coefFriction*vTangencial;
 
 		}
 	}
@@ -297,8 +678,8 @@ void PhysicsInit() {
 }
 void PhysicsUpdate(float dt) {
 
-	UpdatePosition(particlesContainer);
-	CheckColision(particlesContainer);
+	UpdatePosition(pC);
+	CheckColision(pC);
 
 	if (frame % 100 == 0) {
 		InitVerts();
@@ -306,9 +687,9 @@ void PhysicsUpdate(float dt) {
 
 	for (int i = 0; i < 252; ++i) {
 		//update partVerts vector with the new position
-		partVerts[3 * i] = particlesContainer[i].pos.x;
-		partVerts[3 * i + 1] = particlesContainer[i].pos.y;
-		partVerts[3 * i + 2] = particlesContainer[i].pos.z;
+		partVerts[3 * i] = pC[i].pos.x;
+		partVerts[3 * i + 1] = pC[i].pos.y;
+		partVerts[3 * i + 2] = pC[i].pos.z;
 
 	}
 
