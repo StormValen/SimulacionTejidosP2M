@@ -12,7 +12,7 @@
 bool show_test_window = false;
 
 float *partVerts;
-float timePerFrame = 0.033;
+float timePerFrame = 0.0033;
 float radius = 0.05f;
 glm::vec3 gravity = { 0, -9.8, 0 };
 
@@ -87,13 +87,14 @@ void GUI() {
 
 void RandPosSphere() {
 	srand(time(NULL));
-	sphere->pos = { rand()%8-4, 2, rand() % 8 - 4 };
-	sphere->radius = 1.0f;
+	//sphere->pos = { rand()%8-4, 2, rand() % 8 - 4 };
+	sphere->pos = { 0, 2, 0};
+	sphere->radius = 2.0f;
 }
 
 void InitVerts() {
-	Ke = 0.1;
-	Kd = 0;
+	Ke = 1000;
+	Kd = 50;
 
 	partVerts = new float[LilSpheres::maxParticles * 3];
 	RandPosSphere();
@@ -126,54 +127,54 @@ void Srings(Particle *pC, int i) {
 	//asignamos grupo a la particula
 	
 		if (i <= 13) {
-			if (i != 0 && i != 13) {
-				b_fIzquierda = false; b_fIzquierdaIzquierda = false; b_fDerecha = false; b_fDerechaDerecha = false;
+			if (i == 0 || i == 13) {
+				/*b_fIzquierda = false; b_fIzquierdaIzquierda = false; b_fDerecha = false; b_fDerechaDerecha = false;
 				b_fArriba = false; b_fArribaArriba = false; b_fAbajo = false; b_fAbajoAbajo = false;
-				b_fDiagonal1 = false; b_fDiagonal2 = false; b_fDiagonal3 = false; b_fDiagonal4 = false;
+				b_fDiagonal1 = false; b_fDiagonal2 = false; b_fDiagonal3 = false; b_fDiagonal4 = false;*/
 			}
 			else if (i == 1) {
 				//TODO
-				b_fIzquierda = true; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
 				b_fArriba = false; b_fArribaArriba = false; b_fAbajo = true; b_fAbajoAbajo = true;
-				b_fDiagonal1 = false; b_fDiagonal2 = false; b_fDiagonal3 = true; b_fDiagonal4 = true;
+				b_fDiagonal1 = false; b_fDiagonal2 = false; b_fDiagonal3 = true; b_fDiagonal4 = true;*/
 			}
 			else if (i == 12) {
 				//TODO
-				b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = false;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = false;
 				b_fArriba = false; b_fArribaArriba = false; b_fAbajo = true; b_fAbajoAbajo = true;
-				b_fDiagonal1 = false; b_fDiagonal2 = false; b_fDiagonal3 = true; b_fDiagonal4 = true;
+				b_fDiagonal1 = false; b_fDiagonal2 = false; b_fDiagonal3 = true; b_fDiagonal4 = true;*/
 			}
 			else {
-				b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = true;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = true;
 				b_fArriba = false; b_fArribaArriba = false; b_fAbajo = true; b_fAbajoAbajo = true;
-				b_fDiagonal1 = false; b_fDiagonal2 = false; b_fDiagonal3 = true; b_fDiagonal4 = true;
+				b_fDiagonal1 = false; b_fDiagonal2 = false; b_fDiagonal3 = true; b_fDiagonal4 = true;*/
 			}
 		}
 
 		else if (i >= 14 && i <= 27 ) {
 			if (i == 14) {
 				//TODO
-				b_fIzquierda = false; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
+				/*b_fIzquierda = false; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
 				b_fArriba = true; b_fArribaArriba = false; b_fAbajo = true; b_fAbajoAbajo = true;
-				b_fDiagonal1 = false; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = false;
+				b_fDiagonal1 = false; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = false;*/
 			}
 			else if (i == 27) {
 				//TODO
-				b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = false; b_fDerechaDerecha = false;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = false; b_fDerechaDerecha = false;
 				b_fArriba = true; b_fArribaArriba = false; b_fAbajo = true; b_fAbajoAbajo = true;
-				b_fDiagonal1 = true; b_fDiagonal2 = false; b_fDiagonal3 = false; b_fDiagonal4 = true;
+				b_fDiagonal1 = true; b_fDiagonal2 = false; b_fDiagonal3 = false; b_fDiagonal4 = true;*/
 			}
 			else if (i == 15) {
 				//TODO
-				b_fIzquierda = true; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
 				b_fArriba = true; b_fArribaArriba = false; b_fAbajo = true; b_fAbajoAbajo = true;
-				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = true;
+				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = true;*/
 			}
 			else if (i == 26) {
 				//TODO
-				b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = false;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = false;
 				b_fArriba = true; b_fArribaArriba = false; b_fAbajo = true; b_fAbajoAbajo = true;
-				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = true;
+				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = true;*/
 			}
 			else {
 				b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = true;
@@ -185,27 +186,27 @@ void Srings(Particle *pC, int i) {
 		else if (i >= 224 && i <= 237) {
 			if (i == 224) {
 			//TODO
-				b_fIzquierda = false; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
+				/*b_fIzquierda = false; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
 				b_fArriba = true; b_fArribaArriba = true; b_fAbajo = true; b_fAbajoAbajo = false;
-				b_fDiagonal1 = false; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = false;
+				b_fDiagonal1 = false; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = false;*/
 			}
 			else if (i == 237) {
 			//TODO
-				b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = false; b_fDerechaDerecha = false;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = false; b_fDerechaDerecha = false;
 				b_fArriba = true; b_fArribaArriba = true; b_fAbajo = true; b_fAbajoAbajo = false;
-				b_fDiagonal1 = true; b_fDiagonal2 = false; b_fDiagonal3 = false; b_fDiagonal4 = true;
+				b_fDiagonal1 = true; b_fDiagonal2 = false; b_fDiagonal3 = false; b_fDiagonal4 = true;*/
 			}
 			else if (i == 225) {
 				//TODO
-				b_fIzquierda = true; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
 				b_fArriba = true; b_fArribaArriba = true; b_fAbajo = true; b_fAbajoAbajo = false;
-				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = true;
+				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = true;*/
 			}
 			else if (i == 236) {
 				//TODO
-				b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = false;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = false;
 				b_fArriba = true; b_fArribaArriba = true; b_fAbajo = true; b_fAbajoAbajo = false;
-				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = true;
+				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = true;*/
 			}
 			else {
 				b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = true;
@@ -217,61 +218,61 @@ void Srings(Particle *pC, int i) {
 		else if (i >= 238) {
 			if (i == 238) {
 				//TODO
-				b_fIzquierda = false; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
+				/*b_fIzquierda = false; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
 				b_fArriba = true; b_fArribaArriba = true; b_fAbajo = false; b_fAbajoAbajo = false;
-				b_fDiagonal1 = false; b_fDiagonal2 = true; b_fDiagonal3 = false; b_fDiagonal4 = false;
+				b_fDiagonal1 = false; b_fDiagonal2 = true; b_fDiagonal3 = false; b_fDiagonal4 = false;*/
 			}
 			else if (i == 251) {
 			//TODO
-				b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = false; b_fDerechaDerecha = false;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = false; b_fDerechaDerecha = false;
 				b_fArriba = true; b_fArribaArriba = true; b_fAbajo = false; b_fAbajoAbajo = false;
-				b_fDiagonal1 = true; b_fDiagonal2 = false; b_fDiagonal3 = false; b_fDiagonal4 = false;
+				b_fDiagonal1 = true; b_fDiagonal2 = false; b_fDiagonal3 = false; b_fDiagonal4 = false;*/
 			}
 			else if (i == 239) {
 				//TODO
-				b_fIzquierda = true; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
 				b_fArriba = true; b_fArribaArriba = true; b_fAbajo = false; b_fAbajoAbajo = false;
-				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = false; b_fDiagonal4 = false;
+				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = false; b_fDiagonal4 = false;*/
 			}
 			else if (i == 250) {
 				//TODO
-				b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = false;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = false;
 				b_fArriba = true; b_fArribaArriba = true; b_fAbajo = false; b_fAbajoAbajo = false;
-				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = false; b_fDiagonal4 = false;
+				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = false; b_fDiagonal4 = false;*/
 			}
 			else {
-				b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = true;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = true;
 				b_fArriba = true; b_fArribaArriba = true; b_fAbajo = false; b_fAbajoAbajo = false;
-				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = false; b_fDiagonal4 = false;
+				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = false; b_fDiagonal4 = false;*/
 			}
 		}
 
 		else if (i >= 28 && i <= 223) {
 			if (i % 14 == 0) {
 				//TODO
-				b_fIzquierda = false; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
+				/*b_fIzquierda = false; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
 				b_fArriba = true; b_fArribaArriba = true; b_fAbajo = true; b_fAbajoAbajo = true;
-				b_fDiagonal1 = false; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = false;
+				b_fDiagonal1 = false; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = false;*/
 			}
 			else if (i % 14 == 1) {
 				//TODO
-				b_fIzquierda = true; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
 				b_fArriba = true; b_fArribaArriba = true; b_fAbajo = true; b_fAbajoAbajo = true;
-				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = true;
+				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = true;*/
 			}
 			else if (i % 14 == 12) {
 				//TODO
-				b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = false;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = false;
 				b_fArriba = true; b_fArribaArriba = true; b_fAbajo = true; b_fAbajoAbajo = true;
-				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = true;
+				b_fDiagonal1 = true; b_fDiagonal2 = true; b_fDiagonal3 = true; b_fDiagonal4 = true;*/
 			}
 			else if (i % 14 == 13) {
 				//TODO
-				b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = false; b_fDerechaDerecha = false;
+				/*b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = false; b_fDerechaDerecha = false;
 				b_fArriba = true; b_fArribaArriba = true; b_fAbajo = true; b_fAbajoAbajo = true;
-				b_fDiagonal1 = true; b_fDiagonal2 = false; b_fDiagonal3 = false; b_fDiagonal4 = true;
+				b_fDiagonal1 = true; b_fDiagonal2 = false; b_fDiagonal3 = false; b_fDiagonal4 = true;*/
 			}
-			else {
+		else {
 				//TODO
 				b_fIzquierda = true; b_fIzquierdaIzquierda = true; b_fDerecha = true; b_fDerechaDerecha = true;
 				b_fArriba = true; b_fArribaArriba = true; b_fAbajo = true; b_fAbajoAbajo = true;
@@ -305,29 +306,29 @@ void Srings(Particle *pC, int i) {
 			fAbajo = -(Ke* (actualDistance - (0.4f)) + Kd * glm::dot((pC[i].vel - pC[i + 15].vel), actualDistanceNormalized)) *(actualDistanceNormalized);
 		}
 
-		if (b_fIzquierdaIzquierda) {
-			float actualDistance = glm::distance(pC[i-1].pos, pC[i - 2].pos);
-			glm::vec3 actualDistanceNormalized = (pC[i-1].pos - pC[i - 2].pos) / actualDistance;
+		/*if (b_fIzquierdaIzquierda) {
+			float actualDistance = glm::distance(pC[i].pos, pC[i - 2].pos);
+			glm::vec3 actualDistanceNormalized = (pC[i].pos - pC[i - 2].pos) / actualDistance;
 
-			fIzquierdaIzquierda = -(Ke* (actualDistance - (0.4f)) + Kd * glm::dot((pC[i-1].vel - pC[i - 2].vel), actualDistanceNormalized)) *(actualDistanceNormalized);
+			fIzquierdaIzquierda =  -(Ke* (actualDistance - (0.8f)) + Kd * glm::dot((pC[i].vel - pC[i - 2].vel), actualDistanceNormalized)) *(actualDistanceNormalized);
 		}
 		if (b_fDerechaDerecha) {
-			float actualDistance = glm::distance(pC[i+1].pos, pC[i + 2].pos);
-			glm::vec3 actualDistanceNormalized = (pC[i+1].pos - pC[i + 2].pos) / actualDistance;
+			float actualDistance = glm::distance(pC[i].pos, pC[i + 2].pos);
+			glm::vec3 actualDistanceNormalized = (pC[i].pos - pC[i + 2].pos) / actualDistance;
 
-			fDerechaDerecha = -(Ke* (actualDistance - (0.4f)) + Kd * glm::dot((pC[i+1].vel - pC[i + 2].vel), actualDistanceNormalized)) *(actualDistanceNormalized);
+			fDerechaDerecha = -(Ke* (actualDistance - (0.8f)) + Kd * glm::dot((pC[i].vel - pC[i + 2].vel), actualDistanceNormalized)) *(actualDistanceNormalized);
 		}
 		if (b_fArribaArriba) {
-			float actualDistance = glm::distance(pC[i-15].pos, pC[i - 30].pos);
-			glm::vec3 actualDistanceNormalized = (pC[i-15].pos - pC[i - 30].pos) / actualDistance;
+			float actualDistance = glm::distance(pC[i].pos, pC[i - 30].pos);
+			glm::vec3 actualDistanceNormalized = (pC[i].pos - pC[i - 30].pos) / actualDistance;
 
-			fArribaArriba = -(Ke* (actualDistance - (0.4f)) + Kd * glm::dot((pC[i-15].vel - pC[i - 30].vel), actualDistanceNormalized)) *(actualDistanceNormalized);
+			fArribaArriba = -(Ke* (actualDistance - (0.8f)) + Kd * glm::dot((pC[i].vel - pC[i - 30].vel), actualDistanceNormalized)) *(actualDistanceNormalized);
 		}
 		if (b_fAbajoAbajo) {
-			float actualDistance = glm::distance(pC[i+15].pos, pC[i + 30].pos);
-			glm::vec3 actualDistanceNormalized = (pC[i+15].pos - pC[i + 30].pos) / actualDistance;
+			float actualDistance = glm::distance(pC[i].pos, pC[i + 30].pos);
+			glm::vec3 actualDistanceNormalized = (pC[i].pos - pC[i + 30].pos) / actualDistance;
 
-			fAbajo = -(Ke* (actualDistance - (0.4f)) + Kd * glm::dot((pC[i+15].vel - pC[i + 30].vel), actualDistanceNormalized)) *(actualDistanceNormalized);
+			fAbajoAbajo = -(Ke* (actualDistance - (0.8f)) + Kd * glm::dot((pC[i].vel - pC[i + 30].vel), actualDistanceNormalized)) *(actualDistanceNormalized);
 		}
 		
 		if (b_fDiagonal1) {
@@ -353,12 +354,14 @@ void Srings(Particle *pC, int i) {
 			glm::vec3 actualDistanceNormalized = (pC[i].pos - pC[i + 14].pos) / actualDistance;
 
 			fDiagonal4 = -(Ke* (actualDistance - (0.4f)) + Kd * glm::dot((pC[i].vel - pC[i + 14].vel), actualDistanceNormalized)) *(actualDistanceNormalized);
-		}
+		}*/
 		
 		//suma total de fuerzas
 		fTotal[i] = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
 		
+		//std::cout << "INDICE: " << i << std::endl;
 		//std::cout << fTotal[i].x << " " << fTotal[i].y << " " << fTotal[i].z << std::endl;
+		
 }
 
 void UpdatePosition(Particle *pC, int i) {
@@ -458,7 +461,7 @@ void PhysicsUpdate(float dt) {
 		UpdatePosition(pC,i);
 		CheckColision(pC,i);
 
-		if (frame % 100 == 0) {
+		if (frame % 400 == 0) {
 			InitVerts();
 		}
 
