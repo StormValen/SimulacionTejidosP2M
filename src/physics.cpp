@@ -23,7 +23,7 @@ float coefFriction = 0.f;
 float coefElasticity = 0.9f;
 int frame =0;
 float Ke, Kd;
-glm::vec3 fTotal;
+glm::vec3 fTotal[252];
 
 
 namespace LilSpheres {
@@ -92,7 +92,7 @@ void RandPosSphere() {
 }
 
 void InitVerts() {
-	Ke = 0.001;
+	Ke = 0.1;
 	Kd = 0;
 
 	partVerts = new float[LilSpheres::maxParticles * 3];
@@ -124,9 +124,14 @@ void Srings(Particle *pC, int i) {
 		 b_fAbajoAbajo = false, b_fDiagonal1 = false , b_fDiagonal2 = false, b_fDiagonal3 = false, b_fDiagonal4 = false;
 	
 	//asignamos grupo a la particula
+	
 		if (i <= 13) {
-			
-			if (i == 1) {
+			if (i != 0 && i != 13) {
+				b_fIzquierda = false; b_fIzquierdaIzquierda = false; b_fDerecha = false; b_fDerechaDerecha = false;
+				b_fArriba = false; b_fArribaArriba = false; b_fAbajo = false; b_fAbajoAbajo = false;
+				b_fDiagonal1 = false; b_fDiagonal2 = false; b_fDiagonal3 = false; b_fDiagonal4 = false;
+			}
+			else if (i == 1) {
 				//TODO
 				b_fIzquierda = true; b_fIzquierdaIzquierda = false; b_fDerecha = true; b_fDerechaDerecha = true;
 				b_fArriba = false; b_fArribaArriba = false; b_fAbajo = true; b_fAbajoAbajo = true;
@@ -278,9 +283,6 @@ void Srings(Particle *pC, int i) {
 		if (b_fIzquierda) {
 			float actualDistance = glm::distance(pC[i].pos, pC[i - 1].pos);
 			glm::vec3 actualDistanceNormalized = (pC[i].pos - pC[i - 1].pos) / actualDistance;
-			std::cout << i << std::endl;
-			std::cout << "pos:  " << pC[i].pos.x << " " << pC[i].pos.y << " " << pC[i].pos.z << std::endl;
-			std::cout << "pos -1 :  " << pC[i-1].pos.x << " " << pC[i-1].pos.y << " " << pC[i-1].pos.z << std::endl;
 
 			fIzquierda = -(Ke* (actualDistance - (0.4f)) + Kd * glm::dot((pC[i].vel - pC[i - 1].vel), actualDistanceNormalized)) *(actualDistanceNormalized);
 		} 
@@ -354,20 +356,19 @@ void Srings(Particle *pC, int i) {
 		}
 		
 		//suma total de fuerzas
-		fTotal = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
-		//std::cout << fTotal.x << " " << fTotal.y << " " << fTotal.z << std::endl;
+		fTotal[i] = fIzquierda + fIzquierdaIzquierda + fDerecha + fDerechaDerecha + fArriba + fArribaArriba + fAbajo + fAbajoAbajo + fDiagonal1 + fDiagonal2 + fDiagonal3 + fDiagonal4 + gravity;
+		
+		//std::cout << fTotal[i].x << " " << fTotal[i].y << " " << fTotal[i].z << std::endl;
 }
 
 void UpdatePosition(Particle *pC, int i) {
 		
 	if (i != 0 && i != 13) {
 
-			Srings(pC, i);
-
 			pC[i].lastVel = pC[i].vel;
 
 			//update vector velocity velocity with formula
-			pC[i].vel = pC[i].lastVel + fTotal * timePerFrame;
+			pC[i].vel = pC[i].lastVel + fTotal[i] * timePerFrame;
 
 			//save last position 
 			pC[i].lastPos = pC[i].pos;
@@ -447,6 +448,10 @@ void PhysicsInit() {
 }
 
 void PhysicsUpdate(float dt) {
+	
+	for (int i = 0; i < 252; i++) {
+		Srings(pC, i);
+	}
 
 	for (int i = 0; i < 252; i++) {
 
