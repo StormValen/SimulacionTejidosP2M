@@ -90,7 +90,7 @@ void RandPosSphere() {
 	srand(time(NULL));
 	//sphere->pos = { rand()%8-4, 2, rand() % 8 - 4 };
 	sphere->pos = { 0, 4, 0};
-	sphere->radius = 1.5f;
+	sphere->radius = 1.2f;
 }
 
 void InitVerts() {
@@ -106,7 +106,7 @@ void InitVerts() {
 			xDist = -2.8f;
 		}
 		partVerts[i * 3 + 0] = xDist;
-		partVerts[i * 3 + 1] = 7;
+		partVerts[i * 3 + 1] = 6;
 		partVerts[i * 3 + 2] = zDist;
 		xDist += 0.4f;
 	}
@@ -431,16 +431,45 @@ void CheckColision(Particle *pC, int i) {
 		}
 		//SPHERE
 		if (glm::pow((pC[i].pos.x - sphere->pos.x), 2) + glm::pow((pC[i].pos.y - sphere->pos.y), 2) + glm::pow((pC[i].pos.z - sphere->pos.z), 2) <= glm::pow((sphere->radius + radius), 2)) {
+			
 			normal = { pC[i].pos - sphere->pos };
-			d = -(pC[i].pos.x*normal.x) - (pC[i].pos.y*normal.y) - (pC[i].pos.z*normal.z);
 
-			//friction values
-			vNormal = glm::dot(normal, pC[i].vel) * normal;
-			vTangencial = pC[i].vel - vNormal;
+			glm::vec3 intersectionPlus; //punt interseccio recata pla tangencial esfera
+			intersectionPlus.x = sphere->pos.x + (sphere->radius * (pC[i].pos.x - sphere->pos.x)) / (glm::sqrt( glm::pow(pC[i].pos.x - sphere->pos.x,2) + glm::pow(pC[i].pos.y - sphere->pos.y, 2) + glm::pow(pC[i].pos.z - sphere->pos.z, 2)));
+			intersectionPlus.y = sphere->pos.y + (sphere->radius * (pC[i].pos.y - sphere->pos.y)) / (glm::sqrt(glm::pow(pC[i].pos.x - sphere->pos.x, 2) + glm::pow(pC[i].pos.y - sphere->pos.y, 2) + glm::pow(pC[i].pos.z - sphere->pos.z, 2)));
+			intersectionPlus.z = sphere->pos.z + (sphere->radius * (pC[i].pos.z - sphere->pos.z)) / (glm::sqrt(glm::pow(pC[i].pos.x - sphere->pos.x, 2) + glm::pow(pC[i].pos.y - sphere->pos.y, 2) + glm::pow(pC[i].pos.z - sphere->pos.z, 2)));
 
-			//elasticity and friction
-			pC[i].pos = pC[i].pos - (1 + coefElasticity) * (glm::dot(normal, pC[i].pos) + d)*normal;
-			pC[i].vel = pC[i].vel - (1 + coefElasticity) * (glm::dot(normal, pC[i].vel))* normal - coefFriction*vTangencial;
+			glm::vec3 intersectionMinus;
+			intersectionMinus.x = sphere->pos.x - (sphere->radius * (pC[i].pos.x - sphere->pos.x)) / (glm::sqrt(glm::pow(pC[i].pos.x - sphere->pos.x, 2) + glm::pow(pC[i].pos.y - sphere->pos.y, 2) + glm::pow(pC[i].pos.z - sphere->pos.z, 2)));
+			intersectionMinus.y = sphere->pos.y - (sphere->radius * (pC[i].pos.y - sphere->pos.y)) / (glm::sqrt(glm::pow(pC[i].pos.x - sphere->pos.x, 2) + glm::pow(pC[i].pos.y - sphere->pos.y, 2) + glm::pow(pC[i].pos.z - sphere->pos.z, 2)));
+			intersectionMinus.z = sphere->pos.z - (sphere->radius * (pC[i].pos.z - sphere->pos.z)) / (glm::sqrt(glm::pow(pC[i].pos.x - sphere->pos.x, 2) + glm::pow(pC[i].pos.y - sphere->pos.y, 2) + glm::pow(pC[i].pos.z - sphere->pos.z, 2)));
+
+			float dif1, dif2;
+			dif1 = glm::distance(intersectionPlus, pC[i].pos);
+			dif2 = glm::distance(intersectionMinus, pC[i].pos);
+
+			if (dif1 < dif2) {
+				d = -(intersectionPlus.x*normal.x) - (intersectionPlus.y*normal.y) - (intersectionPlus.z*normal.z);
+
+				//friction values
+				vNormal = glm::dot(normal, pC[i].vel) * normal;
+				vTangencial = pC[i].vel - vNormal;
+
+				//elasticity and friction
+				pC[i].pos = intersectionPlus - (1 + coefElasticity) * (glm::dot(normal, intersectionPlus) + d)*normal;
+				pC[i].vel = pC[i].vel - (1 + coefElasticity) * (glm::dot(normal, pC[i].vel))* normal - coefFriction*vTangencial;
+			}
+			else {
+				d = -(intersectionMinus.x*normal.x) - (intersectionMinus.y*normal.y) - (intersectionMinus.z*normal.z);
+
+				//friction values
+				vNormal = glm::dot(normal, pC[i].vel) * normal;
+				vTangencial = pC[i].vel - vNormal;
+
+				//elasticity and friction
+				pC[i].pos = intersectionMinus - (1 + coefElasticity) * (glm::dot(normal, intersectionMinus) + d)*normal;
+				pC[i].vel = pC[i].vel - (1 + coefElasticity) * (glm::dot(normal, pC[i].vel))* normal - coefFriction*vTangencial;
+			}
 		}
 }
 
