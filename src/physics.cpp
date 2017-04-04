@@ -16,11 +16,11 @@ float timePerFrame = 0.003;
 float radius = 0.05f;
 glm::vec3 gravity = { 0, -9.8, 0 };
 
-glm::vec3 normal = { 0,0,0 };
-float d;
+//glm::vec3 normal = { 0,0,0 };
+//float d;
 glm::vec3 vNormal, vTangencial;
 float coefFriction = 0.f;
-float coefElasticity = 0.f;
+float coefElasticity = 0.5f;
 int frame =0;
 int Ke = 1000, Kd = 50;
 glm::vec3 fTotal[252];
@@ -77,6 +77,7 @@ void GUI() {
 		ImGui::SliderFloat("Coef.Friction", &coefFriction, 0, 1);
 		ImGui::InputInt("Ke", &Ke, 10, 100, 0);
 		ImGui::InputInt("Kd", &Kd, 10, 100, 0);
+		ImGui::InputFloat("TimePerFrame", &timePerFrame, 0.0001, 0, 4);
 	}
 
 	// ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
@@ -88,8 +89,8 @@ void GUI() {
 
 void RandPosSphere() {
 	srand(time(NULL));
-	//sphere->pos = { rand()%8-4, 2, rand() % 8 - 4 };
-	sphere->pos = { 0, 4, 0};
+	sphere->pos = { rand()%8-4, 2, rand() % 8 - 4 };
+	//sphere->pos = { 0, 4, 0};
 	sphere->radius = 1.2f;
 }
 
@@ -382,57 +383,74 @@ void UpdatePosition(Particle *pC, int i) {
 }
 
 
-void UpdateColision(Particle *pC, int i) {
+void UpdateColision(Particle *pC, int i, int d, glm::vec3 normal) {
 	
 	//friction values
+
+
+	pC[i].pos = pC[i].pos - (1 + coefElasticity) * (glm::dot(normal, pC[i].pos) + d)*normal;
+	pC[i].vel = pC[i].vel - (1 + coefElasticity) * (glm::dot(normal, pC[i].vel))*normal;
+
 	vNormal = glm::dot(normal, pC[i].vel) * normal;
 	vTangencial = pC[i].vel - vNormal;
 
-	pC[i].pos = pC[i].pos - (1 + coefElasticity) * (glm::dot(normal, pC[i].pos) + d)*normal;
-	pC[i].vel = pC[i].vel - (1 + coefElasticity) * (glm::dot(normal, pC[i].vel))*normal - coefFriction*vTangencial;
+	pC[i].vel = pC[i].vel - coefFriction*vTangencial;
 }
 
 void CheckColision(Particle *pC, int i) {
 		//FLOOR
 		if (pC[i].pos.y <= 0 + radius) {
+			glm::vec3 normal = { 0,0,0 };
+			float d;
 			normal = { 0,1,0 };
 			d = 0;
-			UpdateColision(pC, i);
+			UpdateColision(pC, i, d, normal);
 		}
 		//LEFT WALL
 		else if (pC[i].pos.x <= -5 + radius) {
+			glm::vec3 normal = { 0,0,0 };
+			float d;
 			normal = { 1,0,0 };
 			d = 5;
-			UpdateColision(pC, i);
+			UpdateColision(pC, i, d, normal);
 		}
 		//RIGHT WALL
 		else if (pC[i].pos.x >= 5 - radius) {
+			glm::vec3 normal = { 0,0,0 };
+			float d;
 			normal = { -1,0,0 };
 			d = 5;
-			UpdateColision(pC, i);
+			UpdateColision(pC, i, d, normal);
 		}
 		//FRONT WALL
 		else if (pC[i].pos.z <= -5 + radius) {
+			glm::vec3 normal = { 0,0,0 };
+			float d;
 			normal = { 0,0,1 };
 			d = 5;
-			UpdateColision(pC, i);
+			UpdateColision(pC, i, d, normal);
 		}
 		//BACK WALL
 		else if (pC[i].pos.z >= 5 - radius) {
+			glm::vec3 normal = { 0,0,0 };
+			float d;
 			normal = { 0,0,-1 };
 			d = 5;
-			UpdateColision(pC, i);
+			UpdateColision(pC, i, d, normal);
 		}
 		//TOP WALL
 		else if (pC[i].pos.y >= 10 - radius) {
+			glm::vec3 normal = { 0,0,0 };
+			float d;
 			normal = { 0,-1,0 };
 			d = 10;
-			UpdateColision(pC, i);
+			UpdateColision(pC, i, d, normal);
 		}
 		//SPHERE
 		if (glm::pow((pC[i].pos.x - sphere->pos.x), 2) + glm::pow((pC[i].pos.y - sphere->pos.y), 2) + glm::pow((pC[i].pos.z - sphere->pos.z), 2) <= glm::pow((sphere->radius + radius), 2)) {
 			
-			normal = { pC[i].pos - sphere->pos };
+			glm::vec3 normal = { 0,0,0 };
+			float d;
 
 			glm::vec3 intersectionPlus; //punt interseccio recata pla tangencial esfera
 			intersectionPlus.x = sphere->pos.x + (sphere->radius * (pC[i].pos.x - sphere->pos.x)) / (glm::sqrt( glm::pow(pC[i].pos.x - sphere->pos.x,2) + glm::pow(pC[i].pos.y - sphere->pos.y, 2) + glm::pow(pC[i].pos.z - sphere->pos.z, 2)));
@@ -449,26 +467,33 @@ void CheckColision(Particle *pC, int i) {
 			dif2 = glm::distance(intersectionMinus, pC[i].pos);
 
 			if (dif1 < dif2) {
+				normal = { intersectionPlus - sphere->pos };
 				d = -(intersectionPlus.x*normal.x) - (intersectionPlus.y*normal.y) - (intersectionPlus.z*normal.z);
 
 				//friction values
+				
+
+				//elasticity and friction
+				pC[i].pos = pC[i].pos - (1 + coefElasticity) * (glm::dot(normal, pC[i].pos) + d)*normal;
+				pC[i].vel = pC[i].vel - (1 + coefElasticity) * (glm::dot(normal, pC[i].vel))* normal;
+			
 				vNormal = glm::dot(normal, pC[i].vel) * normal;
 				vTangencial = pC[i].vel - vNormal;
 
-				//elasticity and friction
-				pC[i].pos = intersectionPlus - (1 + coefElasticity) * (glm::dot(normal, intersectionPlus) + d)*normal;
-				pC[i].vel = pC[i].vel - (1 + coefElasticity) * (glm::dot(normal, pC[i].vel))* normal - coefFriction*vTangencial;
+				pC[i].vel = pC[i].vel - coefFriction*vTangencial;
 			}
 			else {
+				normal = { intersectionMinus - sphere->pos };
 				d = -(intersectionMinus.x*normal.x) - (intersectionMinus.y*normal.y) - (intersectionMinus.z*normal.z);
 
-				//friction values
+				//elasticity and friction
+				pC[i].pos = pC[i].pos - (1 + coefElasticity) * (glm::dot(normal, pC[i].pos) + d)*normal;
+				pC[i].vel = pC[i].vel - (1 + coefElasticity) * (glm::dot(normal, pC[i].vel))* normal;
+
 				vNormal = glm::dot(normal, pC[i].vel) * normal;
 				vTangencial = pC[i].vel - vNormal;
 
-				//elasticity and friction
-				pC[i].pos = intersectionMinus - (1 + coefElasticity) * (glm::dot(normal, intersectionMinus) + d)*normal;
-				pC[i].vel = pC[i].vel - (1 + coefElasticity) * (glm::dot(normal, pC[i].vel))* normal - coefFriction*vTangencial;
+				pC[i].vel = pC[i].vel - coefFriction*vTangencial;
 			}
 		}
 }
@@ -480,32 +505,37 @@ void PhysicsInit() {
 }
 
 void PhysicsUpdate(float dt) {
-	
-	for (int i = 0; i < LilSpheres::maxParticles; i++) {
-		Srings(pC, i);
-	}
 
-	for (int i = 0; i < LilSpheres::maxParticles; i++) {
+	for (int x = 0; x < 10; x++) {
 
-		UpdatePosition(pC,i);
-		CheckColision(pC,i);
-
-		if (frame % 400 == 0) {
-			InitVerts();
+		for (int i = 0; i < LilSpheres::maxParticles; i++) {
+			Srings(pC, i);
 		}
 
-		//update partVerts vector with the new position
-		partVerts[3 * i] = pC[i].pos.x;
-		partVerts[3 * i + 1] = pC[i].pos.y;
-		partVerts[3 * i + 2] = pC[i].pos.z;
+		for (int i = 0; i < LilSpheres::maxParticles; i++) {
 
+			UpdatePosition(pC, i);
+			CheckColision(pC, i);
+
+			if (frame % 800 == 0) {
+				InitVerts();
+			}
+
+			//update partVerts vector with the new position
+			partVerts[3 * i] = pC[i].pos.x;
+			partVerts[3 * i + 1] = pC[i].pos.y;
+			partVerts[3 * i + 2] = pC[i].pos.z;
+
+		}
+
+		Sphere::updateSphere(sphere->pos, sphere->radius);
+		LilSpheres::updateParticles(0, LilSpheres::maxParticles, partVerts);
+		ClothMesh::updateClothMesh(partVerts);
+
+		frame++;
 	}
-
-	Sphere::updateSphere(sphere->pos, sphere->radius);
-	LilSpheres::updateParticles(0, LilSpheres::maxParticles, partVerts);
-	ClothMesh::updateClothMesh(partVerts);
-
-	frame++;
+	
+	
 }
 void PhysicsCleanup() {
 	//TODO
