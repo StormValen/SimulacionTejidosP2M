@@ -114,7 +114,7 @@ void InitVerts() {
 
 	for (int i = 0; i < LilSpheres::maxParticles; i++) {
 		pC[i].pos = glm::vec3(partVerts[i * 3], partVerts[i * 3 + 1], partVerts[i * 3 + 2]);
-		pC[i].vel = glm::vec3(0, 0, 0); //random
+		pC[i].vel = glm::vec3(0, 0, 0); 
 	}
 }
 
@@ -521,7 +521,6 @@ void PhysicsUpdate(float dt) {
 				InitVerts();
 			}
 
-			//update partVerts vector with the new position
 			partVerts[3 * i] = pC[i].pos.x;
 			partVerts[3 * i + 1] = pC[i].pos.y;
 			partVerts[3 * i + 2] = pC[i].pos.z;
@@ -538,5 +537,6 @@ void PhysicsUpdate(float dt) {
 	
 }
 void PhysicsCleanup() {
-	//TODO
+	delete[] pC;
+	delete[] partVerts;
 }
