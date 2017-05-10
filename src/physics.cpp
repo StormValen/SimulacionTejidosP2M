@@ -8,6 +8,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <iostream>
+#include <GLFW\glfw3.h>
+
+
+#define PI 3.1416f
 
 bool show_test_window = false;
 
@@ -23,6 +27,17 @@ float coefFriction = 0.f;
 float coefElasticity = 0.5f;
 int frame =0;
 int Ke = 1000, Kd = 50;
+
+
+//AGUITA
+float k = 2 * PI / 0.5f;
+glm::vec3 K = glm::vec3(0.0f,0.0f,1.0f);
+glm::vec3 K2 = glm::vec3(1.0f, 0.0f, 0.0f);
+float A = 0.5f;
+float w = 3.0f;
+//
+
+
 glm::vec3 fTotal[252];
 
 
@@ -36,7 +51,7 @@ namespace LilSpheres {
 
 struct Particle {
 	glm::vec3 pos;
-	glm::vec3 lastPos;
+	glm::vec3 initPos;
 	glm::vec3 vel;
 	glm::vec3 lastVel;
 };
@@ -70,14 +85,15 @@ void GUI() {
 	{	//FrameRate
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		
-		ImGui::SliderFloat("Gravity", &gravity.y, -15, 15);
+		ImGui::SliderFloat("Direccion OnaA X", &K.x, -1.0f, 1.0f);
+		ImGui::SliderFloat("Direccion OnaA Z", &K.z, -1.0f, 1.0f);
+
+		ImGui::SliderFloat("Direccion OnaB X", &K2.x, -1.0f, 1.0f);
+		ImGui::SliderFloat("Direccion OnaB Z", &K2.z, -1.0f, 1.0f);
 
 		//GUI Waterfall
-		ImGui::SliderFloat("Coef.Elasticity", &coefElasticity, 0, 1);
-		ImGui::SliderFloat("Coef.Friction", &coefFriction, 0, 1);
-		ImGui::InputInt("Ke", &Ke, 10, 100, 0);
-		ImGui::InputInt("Kd", &Kd, 10, 100, 0);
-		ImGui::InputFloat("TimePerFrame", &timePerFrame, 0.0001, 0, 4);
+		ImGui::SliderFloat("Amplitud", &A, 0, 1);
+		ImGui::SliderFloat("W", &w, 0, 10);
 	}
 
 	// ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
@@ -90,7 +106,6 @@ void GUI() {
 void RandPosSphere() {
 	srand(time(NULL));
 	sphere->pos = { rand()%8-4, 2, rand() % 8 - 4 };
-	//sphere->pos = { 0, 4, 0};
 	sphere->radius = 1.2f;
 }
 
@@ -114,10 +129,11 @@ void InitVerts() {
 
 	for (int i = 0; i < LilSpheres::maxParticles; i++) {
 		pC[i].pos = glm::vec3(partVerts[i * 3], partVerts[i * 3 + 1], partVerts[i * 3 + 2]);
+		pC[i].initPos = pC[i].pos;
 		pC[i].vel = glm::vec3(0, 0, 0); 
 	}
 }
-
+/*
 void Srings(Particle *pC, int i) {
 	glm::vec3 fIzquierda, fIzquierdaIzquierda, fDerecha, fDerechaDerecha, fArriba, fArribaArriba, fAbajo, fAbajoAbajo, fDiagonal1, fDiagonal2, fDiagonal3, fDiagonal4;
 	
@@ -363,25 +379,13 @@ void Srings(Particle *pC, int i) {
 		//std::cout << fTotal[i].x << " " << fTotal[i].y << " " << fTotal[i].z << std::endl;
 		
 }
-
+*/
 void UpdatePosition(Particle *pC, int i) {
-		
-	if (i != 0 && i != 13) {
-
-			pC[i].lastVel = pC[i].vel;
-
-			//update vector velocity velocity with formula
-			pC[i].vel = pC[i].lastVel + fTotal[i] * timePerFrame;
-
-			//save last position 
-			pC[i].lastPos = pC[i].pos;
-
-			//update position with formula
-			pC[i].pos = pC[i].lastPos + timePerFrame * pC[i].lastVel; //components x and z have 0 gravity.
-
-		}
+	
+			pC[i].pos.x = (pC[i].initPos.x - (K.x / k)*A*sin(glm::dot(K.x,pC[i].initPos.x) - w*(GLfloat)glfwGetTime()))+ (pC[i].initPos.x - (K2.x / k)*A*sin(glm::dot(K2.x, pC[i].initPos.x) - w*(GLfloat)glfwGetTime()));
+			pC[i].pos.z = (pC[i].initPos.z - (K.z / k)*A*sin(glm::dot(K.z, pC[i].initPos.z) - w*(GLfloat)glfwGetTime()))+ (pC[i].initPos.z - (K2.z / k)*A*sin(glm::dot(K2.z, pC[i].initPos.z) - w*(GLfloat)glfwGetTime()));
+			pC[i].pos.y = (A*(cos(glm::dot(K.z, pC[i].initPos.z) - w*(GLfloat)glfwGetTime()))+2)+ (A*(cos(glm::dot(K2.x, pC[i].initPos.x) - w*(GLfloat)glfwGetTime())) + 2);
 }
-
 
 void UpdateColision(Particle *pC, int i, int d, glm::vec3 normal) {
 	
@@ -502,20 +506,16 @@ void CheckColision(Particle *pC, int i) {
 void PhysicsInit() {
 
 	InitVerts();
-}
+} 
 
 void PhysicsUpdate(float dt) {
 
-	for (int x = 0; x < 10; x++) {
-
-		for (int i = 0; i < LilSpheres::maxParticles; i++) {
-			Srings(pC, i);
-		}
+	
 
 		for (int i = 0; i < LilSpheres::maxParticles; i++) {
 
 			UpdatePosition(pC, i);
-			CheckColision(pC, i);
+			//CheckColision(pC, i);
 
 			if (frame % 800 == 0) {
 				InitVerts();
@@ -532,7 +532,7 @@ void PhysicsUpdate(float dt) {
 		ClothMesh::updateClothMesh(partVerts);
 
 		frame++;
-	}
+	
 	
 	
 }
