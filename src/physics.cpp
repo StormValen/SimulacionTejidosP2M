@@ -18,7 +18,7 @@ bool show_test_window = false;
 float *partVerts;
 float timePerFrame = 0.003;
 float radius = 0.05f;
-glm::vec3 gravity = { 0, -0.5, 0 };
+glm::vec3 gravity = { 0, -9.8f, 0 };
 
 
 glm::vec3 vNormal, vTangencial;
@@ -107,7 +107,7 @@ void GUI() {
 
 void RandPosSphere() {
 	srand(time(NULL));
-	sphere->pos = { rand()%8-4, 8, rand() % 8 - 4 };
+	sphere->pos = { rand()%8-4, 6, rand() % 8 - 4 };
 	sphere->radius = 1.2f;
 	sphere->lastPos = glm::vec3(sphere->pos);
 	sphere->vel = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -167,9 +167,9 @@ void PhysicsInit() {
 	InitVerts();
 } 
 
-void Flotability(Particle *pC) {
+void Flotability(Particle *pC, float dt) {
 
-	float distance[3] = { 50.0f,50.0f,50.0f};
+	float distance[4] = { 50.0f,50.0f,50.0f,50.0f };
 
 	int index[4];
 
@@ -179,6 +179,8 @@ void Flotability(Particle *pC) {
 
 		if (temp < distance[0]) {
 
+			distance[3] = distance[2];
+			index[3] = index[2];
 			distance[2] = distance[1];
 			index[2] = index[1];
 			distance[1] = distance[0];
@@ -188,81 +190,42 @@ void Flotability(Particle *pC) {
 		}
 	}
 
-	int M0 = index[0] % 14;
-	int M1 = index[1] % 14;
-	int M2 = index[2] % 14;
-	int M3;
+	float AVG = (pC[index[0]].pos.y + pC[index[1]].pos.y + pC[index[2]].pos.y + pC[index[3]].pos.y) / 4;
 	
-	if (M1 == M2) {
-		M3 = M0;
+	if (sphere->pos.y-sphere->radius < AVG) {
+		float h = glm::abs(sphere->pos.y - AVG);
+
+
+		//float V_sub = (1.f / 3.f)*PI*glm::pow(h, 2)*(3 * sphere->radius - h);
+
+		float V_sub = glm::pow(sphere->radius * 2, 2)*h;
+		if (V_sub > 13.82) {
+			V_sub = 13.82;
+		}
+
+		glm::vec3 F_buoyancy = 5.f * -gravity* V_sub * glm::vec3(0, 1, 0);
+		std::cout << V_sub << std::endl;
+		sphere->lastVel = sphere->vel;
+		sphere->vel = sphere->lastVel + ((F_buoyancy+gravity)/5.f) * dt;
+		sphere->lastPos = sphere->pos;
+		sphere->pos = sphere->lastPos + sphere->vel*dt;
 	}
-	else{
-		M3 = M1;
-	}
-
-
-
-
-
-	/*if (glm::abs(index[0] - index[1]) == 1) {
-		//i[2]
-		if (index[2] < index[0]) {
-			for (int i = 0; i < 14; i++) {
-
-			}
-		}
-		if (index[2] > index[0]) {
-			for (int i = 0; i < 14; i++) {
-
-			}
-		}
-	}
-	if (glm::abs(index[1] - index[2]) == 1) {
-		//i[0]
-		if (index[0] < index[1]) {
-			for (int i = 0; i < 14; i++) {
-
-			}
-		}
-		if (index[0] > index[1]) {
-			for (int i = 0; i < 14; i++) {
-
-			}
-		}
-	}
-	if (glm::abs(index[2] - index[1]) == 1) {
-		//i[1]
-		if (index[1] < index[0]) {
-			for (int i = 0; i < 14; i++) {
-
-			}
-		}
-		if (index[1] > index[0]) {
-			for (int i = 0; i < 14; i++) {
-
-			}
-		}
-	}*/
-
-
-
-
-	std::cout << "////////////////////////////" << std::endl;
-	for (int i = 0; i < 3; i++) {
-		std::cout << index[i] << std::endl;
+	else if(sphere->pos.y - sphere->radius > AVG){
+		sphere->lastVel = sphere->vel;
+		sphere->vel = sphere->lastVel + (gravity/5.f) * dt;
+		//std::cout << sphere->vel.y << std::endl;
+		sphere->lastPos = sphere->pos;
+		sphere->pos = sphere->lastPos + sphere->vel*dt;
 	}
 
-	float V_sub = 4 / 3 * PI * glm::pow(sphere->radius, 3);
-	glm::vec3 F_buoyancy = 1000.0f * 0.5f * V_sub * glm::vec3(0, 1, 0);
-	sphere->lastVel = sphere->vel;
-	sphere->vel = sphere->lastVel + F_buoyancy * timePerFrame;
-	sphere->lastPos = sphere->pos;
-	sphere->pos = sphere->lastPos + timePerFrame * sphere->lastVel;
+
+
+
 }
 
 void PhysicsUpdate(float dt) {
 
-	Flotability(pC);
+	Flotability(pC,dt);
 
 		for (int i = 0; i < LilSpheres::maxParticles; i++) {
 
