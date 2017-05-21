@@ -19,7 +19,7 @@ float *partVerts;
 float timePerFrame = 0.003;
 float radius = 0.05f;
 glm::vec3 gravity = { 0, -9.8f, 0 };
-GLfloat masaEsfera = 3.0f;
+GLfloat masaEsfera = 10.0f;
 
 
 glm::vec3 vNormal, vTangencial;
@@ -194,33 +194,20 @@ void Flotability(Particle *pC, float dt) {
 	float AVG = (pC[index[0]].pos.y + pC[index[1]].pos.y + pC[index[2]].pos.y + pC[index[3]].pos.y) / 4;
 	
 	if (sphere->pos.y-sphere->radius < AVG) {
-		float h = AVG - sphere->pos.y;
-		
-
-
-		//float V_sub = (1.f / 3.f)*PI*glm::pow(h, 2)*(3 * sphere->radius - h);
+	
+		float h = (AVG - (sphere->pos.y - sphere->radius));
 
 		float V_sub = 5.76*glm::abs(h);
-		/*if (V_sub > 13.82) {
-			V_sub = 13.82;
-		}*/
-
-		//std::cout << "AVG: " << AVG << std::endl;
-		//std::cout << "POS: " << sphere->pos.y - sphere->radius << std::endl;
-		//std::cout << "LAST VEL: " << sphere->lastVel.y << std::endl;
-		std::cout << "H: " << h << std::endl;
-		//std::cout << "V_SUB: " << V_sub << std::endl;
-
-		glm::vec3 F_buoyancy = 0.5f * 9.8f * V_sub * glm::vec3(0, 1, 0);
-		//std::cout << "F_BOUYANCY: " << F_buoyancy.y << std::endl;
+		
+		glm::vec3 F_buoyancy = 0.2f * -gravity * V_sub * glm::vec3(0, 1, 0);
 		sphere->lastVel = sphere->vel;
-		sphere->vel = sphere->lastVel + (F_buoyancy+(gravity*masaEsfera)) * dt;
+		sphere->vel = sphere->lastVel + ((F_buoyancy + gravity)/masaEsfera) * dt;
 		sphere->lastPos = sphere->pos;
 		sphere->pos = sphere->lastPos + sphere->vel*dt;
 	}
 	else if(sphere->pos.y - sphere->radius > AVG){
 		sphere->lastVel = sphere->vel;
-		sphere->vel = sphere->lastVel +  (gravity*masaEsfera) * dt;
+		sphere->vel = sphere->lastVel +  (gravity/masaEsfera) * dt;
 		
 		sphere->lastPos = sphere->pos;
 		sphere->pos = sphere->lastPos + sphere->vel*dt;
@@ -237,16 +224,15 @@ void PhysicsUpdate(float dt) {
 		for (int i = 0; i < LilSpheres::maxParticles; i++) {
 
 			UpdatePosition(pC, i);
-			
-
-			if (frame % 80 == 0) {
-				InitVerts();
-			}
 
 			partVerts[3 * i] = pC[i].pos.x;
 			partVerts[3 * i + 1] = pC[i].pos.y;
 			partVerts[3 * i + 2] = pC[i].pos.z;
 
+		}
+
+		if (frame % 1000 == 0) {
+			InitVerts();
 		}
 
 		Sphere::updateSphere(sphere->pos, sphere->radius);
