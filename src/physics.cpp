@@ -19,6 +19,7 @@ float *partVerts;
 float timePerFrame = 0.003;
 float radius = 0.05f;
 glm::vec3 gravity = { 0, -9.8f, 0 };
+GLfloat masaEsfera = 3.0f;
 
 
 glm::vec3 vNormal, vTangencial;
@@ -107,7 +108,7 @@ void GUI() {
 
 void RandPosSphere() {
 	srand(time(NULL));
-	sphere->pos = { rand()%8-4, 6, rand() % 8 - 4 };
+	sphere->pos = { rand()%3+0, 6, rand() %3+0 };
 	sphere->radius = 1.2f;
 	sphere->lastPos = glm::vec3(sphere->pos);
 	sphere->vel = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -193,32 +194,38 @@ void Flotability(Particle *pC, float dt) {
 	float AVG = (pC[index[0]].pos.y + pC[index[1]].pos.y + pC[index[2]].pos.y + pC[index[3]].pos.y) / 4;
 	
 	if (sphere->pos.y-sphere->radius < AVG) {
-		float h = glm::abs(sphere->pos.y - AVG);
+		float h = AVG - sphere->pos.y;
+		
 
 
 		//float V_sub = (1.f / 3.f)*PI*glm::pow(h, 2)*(3 * sphere->radius - h);
 
-		float V_sub = glm::pow(sphere->radius * 2, 2)*h;
-		if (V_sub > 13.82) {
+		float V_sub = 5.76*glm::abs(h);
+		/*if (V_sub > 13.82) {
 			V_sub = 13.82;
-		}
+		}*/
 
-		glm::vec3 F_buoyancy = 5.f * -gravity* V_sub * glm::vec3(0, 1, 0);
-		std::cout << V_sub << std::endl;
+		//std::cout << "AVG: " << AVG << std::endl;
+		//std::cout << "POS: " << sphere->pos.y - sphere->radius << std::endl;
+		//std::cout << "LAST VEL: " << sphere->lastVel.y << std::endl;
+		std::cout << "H: " << h << std::endl;
+		//std::cout << "V_SUB: " << V_sub << std::endl;
+
+		glm::vec3 F_buoyancy = 0.5f * 9.8f * V_sub * glm::vec3(0, 1, 0);
+		//std::cout << "F_BOUYANCY: " << F_buoyancy.y << std::endl;
 		sphere->lastVel = sphere->vel;
-		sphere->vel = sphere->lastVel + ((F_buoyancy+gravity)/5.f) * dt;
+		sphere->vel = sphere->lastVel + (F_buoyancy+(gravity*masaEsfera)) * dt;
 		sphere->lastPos = sphere->pos;
 		sphere->pos = sphere->lastPos + sphere->vel*dt;
 	}
 	else if(sphere->pos.y - sphere->radius > AVG){
 		sphere->lastVel = sphere->vel;
-		sphere->vel = sphere->lastVel + (gravity/5.f) * dt;
-		//std::cout << sphere->vel.y << std::endl;
+		sphere->vel = sphere->lastVel +  (gravity*masaEsfera) * dt;
+		
 		sphere->lastPos = sphere->pos;
 		sphere->pos = sphere->lastPos + sphere->vel*dt;
 	}
-
-
+	
 
 
 }
@@ -232,7 +239,7 @@ void PhysicsUpdate(float dt) {
 			UpdatePosition(pC, i);
 			
 
-			if (frame % 800 == 0) {
+			if (frame % 80 == 0) {
 				InitVerts();
 			}
 
