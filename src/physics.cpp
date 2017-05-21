@@ -19,7 +19,7 @@ float *partVerts;
 float timePerFrame = 0.003;
 float radius = 0.05f;
 glm::vec3 gravity = { 0, -9.8f, 0 };
-GLfloat masaEsfera = 10.0f;
+GLfloat masaEsfera = 5.f;
 
 
 glm::vec3 vNormal, vTangencial;
@@ -199,15 +199,15 @@ void Flotability(Particle *pC, float dt) {
 
 		float V_sub = 5.76*glm::abs(h);
 		
-		glm::vec3 F_buoyancy = 0.2f * -gravity * V_sub * glm::vec3(0, 1, 0);
+		glm::vec3 F_buoyancy = 1.5f * -gravity * V_sub * glm::vec3(0, 1, 0);
 		sphere->lastVel = sphere->vel;
-		sphere->vel = sphere->lastVel + ((F_buoyancy + gravity)/masaEsfera) * dt;
+		sphere->vel = sphere->lastVel + (F_buoyancy + (gravity *masaEsfera)) * dt;
 		sphere->lastPos = sphere->pos;
 		sphere->pos = sphere->lastPos + sphere->vel*dt;
 	}
 	else if(sphere->pos.y - sphere->radius > AVG){
 		sphere->lastVel = sphere->vel;
-		sphere->vel = sphere->lastVel +  (gravity/masaEsfera) * dt;
+		sphere->vel = sphere->lastVel +  (gravity*masaEsfera) * dt;
 		
 		sphere->lastPos = sphere->pos;
 		sphere->pos = sphere->lastPos + sphere->vel*dt;
