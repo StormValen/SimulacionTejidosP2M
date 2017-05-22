@@ -198,10 +198,16 @@ void Flotability(Particle *pC, float dt) {
 		float h = (AVG - (sphere->pos.y - sphere->radius));
 
 		float V_sub = 5.76*glm::abs(h);
+
+		float coefDrag = 1.f;
+		float crossSectionalArea;
+		crossSectionalArea = 3.1416 * glm::pow(((h)), 2);
+		glm::vec3 fDrag = (1.5f*  coefDrag * crossSectionalArea*  glm::length(sphere->vel) * sphere->vel);
+		fDrag = fDrag * (-1.f / 2.f);
 		
 		glm::vec3 F_buoyancy = 1.5f * -gravity * V_sub * glm::vec3(0, 1, 0);
 		sphere->lastVel = sphere->vel;
-		sphere->vel = sphere->lastVel + (F_buoyancy + (gravity *masaEsfera)) * dt;
+		sphere->vel = sphere->lastVel + (F_buoyancy + fDrag + (gravity *masaEsfera)) * dt;
 		sphere->lastPos = sphere->pos;
 		sphere->pos = sphere->lastPos + sphere->vel*dt;
 	}
