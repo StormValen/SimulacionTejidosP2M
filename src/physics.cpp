@@ -207,7 +207,7 @@ void Flotability(Particle *pC, float dt) {
 		
 		glm::vec3 F_buoyancy = 1.5f * -gravity * V_sub * glm::vec3(0, 1, 0);
 		sphere->lastVel = sphere->vel;
-		sphere->vel = sphere->lastVel + (F_buoyancy + fDrag + (gravity *masaEsfera)) * dt;
+		sphere->vel = sphere->lastVel + (F_buoyancy + fDrag  + (gravity *masaEsfera)) * dt;
 		sphere->lastPos = sphere->pos;
 		sphere->pos = sphere->lastPos + sphere->vel*dt;
 	}
@@ -237,7 +237,7 @@ void PhysicsUpdate(float dt) {
 
 		}
 
-		if (frame % 1000 == 0) {
+		if (frame % 500 == 0) {
 			InitVerts();
 		}
 

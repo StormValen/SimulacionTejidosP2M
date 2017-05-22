@@ -471,7 +471,7 @@ void drawSphere() {
 	glUniformMatrix4fv(glGetUniformLocation(sphereProgram, "mvpMat"), 1, GL_FALSE, glm::value_ptr(_MVP));
 	glUniformMatrix4fv(glGetUniformLocation(sphereProgram, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(_modelView));
 	glUniformMatrix4fv(glGetUniformLocation(sphereProgram, "projMat"), 1, GL_FALSE, glm::value_ptr(_projection));
-	glUniform4f(glGetUniformLocation(sphereProgram, "color"), 0.6f, 0.1f, 0.1f, 1.f);
+	glUniform4f(glGetUniformLocation(sphereProgram, "color"), 1.0f, 0.0f, 0.0f, 1.f);
 	glUniform1f(glGetUniformLocation(sphereProgram, "radius"), Sphere::radius);
 	glDrawArrays(GL_POINTS, 0, 1);
 
